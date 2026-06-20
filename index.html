@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>reporterbot &lt;/&gt;</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background: #87CEEB;
+  }
+
+  /* ── Sky & Scene ── */
+  .sky {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(180deg, #4FC3F7 0%, #81D4FA 40%, #B3E5FC 70%, #E1F5FE 100%);
+    overflow: hidden;
+  }
+
+  .sun {
+    position: absolute;
+    top: clamp(30px, 6vh, 80px);
+    right: clamp(40px, 8vw, 140px);
+    width: clamp(60px, 8vw, 100px);
+    height: clamp(60px, 8vw, 100px);
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 38%, #FFF9C4 0%, #FFE082 40%, #FFB300 100%);
+    box-shadow:
+      0 0 clamp(20px,4vw,50px) clamp(10px,2vw,25px) rgba(255,200,0,0.35),
+      0 0 clamp(40px,8vw,100px) clamp(20px,4vw,50px) rgba(255,220,50,0.18);
+  }
+
+  .cloud {
+    position: absolute;
+    display: flex;
+    align-items: flex-end;
+    animation: drift linear infinite;
+  }
+  .cloud .body {
+    border-radius: 50px;
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    position: relative;
+  }
+  .cloud .body::before,
+  .cloud .body::after {
+    content: '';
+    position: absolute;
+    background: rgba(255,255,255,0.92);
+    border-radius: 50%;
+  }
+  .c1 { top: 8%;  animation-duration: 38s; animation-delay: 0s; }
+  .c1 .body { width: 160px; height: 50px; }
+  .c1 .body::before { width: 80px; height: 70px; top: -42px; left: 20px; }
+  .c1 .body::after  { width: 60px; height: 55px; top: -32px; left: 70px; }
+
+  .c2 { top: 18%; animation-duration: 24s; animation-delay: -10s; }
+  .c2 .body { width: 90px; height: 30px; }
+  .c2 .body::before { width: 45px; height: 40px; top: -24px; left: 12px; }
+  .c2 .body::after  { width: 35px; height: 30px; top: -18px; left: 40px; }
+
+  .c3 { top: 30%; animation-duration: 30s; animation-delay: -18s; }
+  .c3 .body { width: 120px; height: 40px; }
+  .c3 .body::before { width: 60px; height: 55px; top: -34px; left: 16px; }
+  .c3 .body::after  { width: 50px; height: 42px; top: -26px; left: 55px; }
+
+  .c4 { top: 12%; animation-duration: 18s; animation-delay: -6s; }
+  .c4 .body { width: 70px; height: 24px; }
+  .c4 .body::before { width: 36px; height: 32px; top: -20px; left: 8px; }
+  .c4 .body::after  { width: 28px; height: 24px; top: -14px; left: 32px; }
+
+  .c5 { top: 22%; animation-duration: 44s; animation-delay: -28s; }
+  .c5 .body { width: 200px; height: 55px; }
+  .c5 .body::before { width: 95px; height: 80px; top: -50px; left: 24px; }
+  .c5 .body::after  { width: 70px; height: 60px; top: -36px; left: 95px; }
+
+  @keyframes drift {
+    from { transform: translateX(calc(-100% - 220px)); }
+    to   { transform: translateX(calc(100vw + 220px)); }
+  }
+
+  /* ── Page Layout ── */
+  .page {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: clamp(16px, 3vw, 32px);
+    gap: clamp(10px, 1.8vh, 18px);
+  }
+
+  /* ── Cards ── */
+  .card {
+    width: 100%;
+    max-width: clamp(320px, 80vw, 680px);
+    background: rgba(10, 30, 60, 0.55);
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: clamp(12px, 2vw, 20px);
+    padding: clamp(14px, 2.5vw, 24px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+
+  /* ── Profile Card ── */
+  .profile-card {
+    display: flex;
+    align-items: center;
+    gap: clamp(12px, 2vw, 20px);
+  }
+
+  .pfp {
+    flex-shrink: 0;
+    width: clamp(52px, 9vw, 72px);
+    height: clamp(52px, 9vw, 72px);
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2.5px solid rgba(255,255,255,0.35);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+  }
+
+  .profile-text { display: flex; flex-direction: column; gap: 4px; }
+
+  .display-name {
+    color: #fff;
+    font-size: clamp(1rem, 2.2vw, 1.25rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  .bio {
+    color: rgba(200,220,255,0.85);
+    font-size: clamp(0.72rem, 1.4vw, 0.88rem);
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  /* ── Section Cards ── */
+  .section-title {
+    color: #fff;
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    font-weight: 700;
+    margin-bottom: clamp(10px, 1.8vh, 16px);
+    letter-spacing: -0.02em;
+  }
+
+  .bullets {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(6px, 1.2vh, 10px);
+    list-style: none;
+    padding: 0;
+  }
+
+  .bullets li {
+    color: rgba(210,230,255,0.9);
+    font-size: clamp(0.78rem, 1.5vw, 0.95rem);
+    font-weight: 400;
+    line-height: 1.5;
+    padding-left: 1.1em;
+    position: relative;
+  }
+
+  .bullets li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #64B5F6;
+  }
+
+  /* ── Contact Card ── */
+  .contact-entries {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(12px, 2vh, 18px);
+  }
+
+  .contact-entry {
+    display: flex;
+    align-items: center;
+    gap: clamp(10px, 1.8vw, 16px);
+  }
+
+  .contact-pfp {
+    flex-shrink: 0;
+    width: clamp(44px, 7.5vw, 60px);
+    height: clamp(44px, 7.5vw, 60px);
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.25);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  .contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .contact-name {
+    color: #fff;
+    font-size: clamp(0.85rem, 1.7vw, 1.02rem);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .contact-handle {
+    color: #90A4AE;
+    font-size: clamp(0.7rem, 1.2vw, 0.82rem);
+    font-weight: 400;
+  }
+
+  /* Button — inline-block so it only takes up as much width as the text needs */
+  .profile-btn {
+    display: inline-block;
+    width: fit-content;
+    margin-top: clamp(5px, 0.9vh, 9px);
+    padding: clamp(4px, 0.7vh, 7px) clamp(12px, 1.8vw, 16px);
+    background: #2196F3;
+    color: #fff;
+    font-size: clamp(0.72rem, 1.3vw, 0.84rem);
+    font-weight: 500;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
+    box-shadow: 0 2px 8px rgba(33,150,243,0.35);
+    letter-spacing: 0.01em;
+  }
+
+  .profile-btn:hover {
+    background: #1976D2;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(33,150,243,0.45);
+  }
+  .profile-btn:active { transform: translateY(0); }
+
+  .divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin: 0;
+  }
+
+  .likings-sign-off {
+    margin-top: clamp(10px, 1.6vh, 14px);
+    color: rgba(210,230,255,0.9);
+    font-size: clamp(0.78rem, 1.5vw, 0.95rem);
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  /* Loading skeleton shimmer */
+  .skeleton {
+    background: linear-gradient(90deg, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.08) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 4px;
+    color: transparent;
+    user-select: none;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Animated Sky -->
+<div class="sky">
+  <div class="sun"></div>
+  <div class="cloud c1"><div class="body"></div></div>
+  <div class="cloud c2"><div class="body"></div></div>
+  <div class="cloud c3"><div class="body"></div></div>
+  <div class="cloud c4"><div class="body"></div></div>
+  <div class="cloud c5"><div class="body"></div></div>
+</div>
+
+<!-- Page Content -->
+<div class="page">
+
+  <!-- Profile Card -->
+  <div class="card">
+    <div class="profile-card">
+      <img class="pfp"
+        src="https://cdn.discordapp.com/avatars/840971769925861446/9f3963f5b719d20b875e973310c1810f.webp?size=160"
+        alt="reporterbot avatar" />
+      <div class="profile-text">
+        <span class="display-name">reporterbot &lt;/&gt;</span>
+        <span class="bio">a person with a passion for coding, but uses claude ❤️</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Card -->
+  <div class="card">
+    <div class="section-title">who am i?</div>
+    <ul class="bullets">
+      <li>an absolute vibecoder because AI in this age is like discovering bitcoin back then</li>
+      <li>tryna get into cybersecurity and encryption stuff to secure systems</li>
+      <li>i wanna make things easier to do in an accessible way</li>
+      <li>russian boii, yes i speak the cs:go language smh</li>
+      <li>gotta mog em all you feeling me, try your best vro</li>
+    </ul>
+  </div>
+
+  <!-- Contact Card -->
+  <div class="card">
+    <div class="section-title">contact info</div>
+    <div class="contact-entries">
+
+      <!-- Entry 1: Roblox user 4171056829 — loaded via API -->
+      <div class="contact-entry">
+        <img class="contact-pfp" id="roblox-pfp"
+          src="https://cdn.discordapp.com/embed/avatars/0.png"
+          alt="Roblox avatar" />
+        <div class="contact-info">
+          <span class="contact-name skeleton" id="roblox-name" style="min-width:80px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <span class="contact-handle" id="roblox-handle" style="color:#90A4AE;">@...</span>
+          <a class="profile-btn" id="roblox-btn" href="https://www.roblox.com/users/4171056829/profile" target="_blank" rel="noopener">Profile</a>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Entry 2: Discord reporterbot -->
+      <div class="contact-entry">
+        <img class="contact-pfp"
+          src="https://cdn.discordapp.com/avatars/840971769925861446/9f3963f5b719d20b875e973310c1810f.webp?size=160"
+          alt="repobot avatar" />
+        <div class="contact-info">
+          <span class="contact-name">repobot</span>
+          <span class="contact-handle" style="color:#90A4AE;">@k40y</span>
+          <a class="profile-btn" href="https://discord.com/users/840971769925861446" target="_blank" rel="noopener">Profile</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- Likings Card -->
+  <div class="card">
+    <div class="section-title">likings</div>
+    <ul class="bullets">
+      <li>simulator games with economys and gambling</li>
+      <li>survival games with building, crafting, and progressing</li>
+      <li>fps with match making or any conquering with matchmaking</li>
+      <li>grow a garden 🤤</li>
+    </ul>
+    <p class="likings-sign-off">okay that's it bye thanks for checking my page out :)</p>
+  </div>
+
+</div>
+
+<script>
+  const ROBLOX_ID = 4171056829;
+
+  async function loadRobloxUser() {
+    try {
+      // Fetch user info
+      const userRes = await fetch(`https://users.roblox.com/v1/users/${ROBLOX_ID}`);
+      const user = await userRes.json();
+
+      const displayName = user.displayName || user.name || String(ROBLOX_ID);
+      const username    = user.name || String(ROBLOX_ID);
+
+      document.getElementById('roblox-name').textContent = displayName;
+      document.getElementById('roblox-name').classList.remove('skeleton');
+      document.getElementById('roblox-handle').textContent = '@' + username;
+      document.getElementById('roblox-btn').href = `https://www.roblox.com/users/${ROBLOX_ID}/profile`;
+
+      // Fetch avatar headshot (bust)
+      const avatarRes = await fetch(
+        `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${ROBLOX_ID}&size=150x150&format=Png&isCircular=false`
+      );
+      const avatarData = await avatarRes.json();
+      const imgUrl = avatarData?.data?.[0]?.imageUrl;
+      if (imgUrl) {
+        document.getElementById('roblox-pfp').src = imgUrl;
+      }
+    } catch (err) {
+      console.warn('Roblox API error:', err);
+      document.getElementById('roblox-name').textContent = String(ROBLOX_ID);
+      document.getElementById('roblox-name').classList.remove('skeleton');
+      document.getElementById('roblox-handle').textContent = '@' + ROBLOX_ID;
+    }
+  }
+
+  loadRobloxUser();
+</script>
+</body>
+</html>
