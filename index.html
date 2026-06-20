@@ -365,40 +365,19 @@
 </div>
 
 <script>
-  const ROBLOX_ID = 4171056829;
+  // Roblox blocks browser fetches via CORS so we hardcode the known values
+  // from https://users.roblox.com/v1/users/4171056829
+  const ROBLOX_ID          = 4171056829;
+  const ROBLOX_DISPLAY     = 'rupertgamingboi';
+  const ROBLOX_USERNAME    = 'shrek123737373737373';
+  // Roblox headshot images can be loaded directly as <img> src — no CORS issue
+  const ROBLOX_AVATAR_URL  = `https://www.roblox.com/headshot-thumbnail/image?userId=${ROBLOX_ID}&width=150&height=150&format=png`;
 
-  async function loadRobloxUser() {
-    try {
-      // Fetch user info
-      const userRes = await fetch(`https://users.roblox.com/v1/users/${ROBLOX_ID}`);
-      const user = await userRes.json();
-
-      const displayName = user.displayName;
-      const username    = user.name;
-
-      document.getElementById('roblox-name').textContent = displayName;
-      document.getElementById('roblox-name').classList.remove('skeleton');
-      document.getElementById('roblox-handle').textContent = '@' + username;
-      document.getElementById('roblox-btn').href = `https://www.roblox.com/users/${ROBLOX_ID}/profile`;
-
-      // Fetch avatar headshot (bust)
-      const avatarRes = await fetch(
-        `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${ROBLOX_ID}&size=150x150&format=Png&isCircular=false`
-      );
-      const avatarData = await avatarRes.json();
-      const imgUrl = avatarData?.data?.[0]?.imageUrl;
-      if (imgUrl) {
-        document.getElementById('roblox-pfp').src = imgUrl;
-      }
-    } catch (err) {
-      console.warn('Roblox API error:', err);
-      document.getElementById('roblox-name').textContent = String(ROBLOX_ID);
-      document.getElementById('roblox-name').classList.remove('skeleton');
-      document.getElementById('roblox-handle').textContent = '@' + ROBLOX_ID;
-    }
-  }
-
-  loadRobloxUser();
+  document.getElementById('roblox-name').textContent    = ROBLOX_DISPLAY;
+  document.getElementById('roblox-name').classList.remove('skeleton');
+  document.getElementById('roblox-handle').textContent  = '@' + ROBLOX_USERNAME;
+  document.getElementById('roblox-pfp').src             = ROBLOX_AVATAR_URL;
+  document.getElementById('roblox-btn').href            = `https://www.roblox.com/users/${ROBLOX_ID}/profile`;
 </script>
 </body>
 </html>
