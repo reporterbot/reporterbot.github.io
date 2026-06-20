@@ -373,8 +373,8 @@
       const userRes = await fetch(`https://users.roblox.com/v1/users/${ROBLOX_ID}`);
       const user = await userRes.json();
 
-      const displayName = user.displayName || user.name || String(ROBLOX_ID);
-      const username    = user.name || String(ROBLOX_ID);
+      const displayName = user.displayName;
+      const username    = user.name;
 
       document.getElementById('roblox-name').textContent = displayName;
       document.getElementById('roblox-name').classList.remove('skeleton');
